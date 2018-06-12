@@ -12,14 +12,14 @@ Up-to-date documentation and explanations can be found in the [Apollo Server 1.2
 git clone https://github.com/apollostack/apollo-starter-kit
 cd apollo-starter-kit
 npm install
-npm run start
+npm start
 ```
 
 Then open [http://localhost:3000/graphiql](http://localhost:3000/graphiql)
 
 When you paste this on the left side of the page:
 
-```
+```graphql
 {
   testString
 }
