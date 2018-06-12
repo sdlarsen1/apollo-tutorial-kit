@@ -3,7 +3,7 @@ import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import bodyParser from 'body-parser';
 import schema from './data/schema';
 import compression from 'compression';
-import { Engine } from 'apollo-engine';
+import { ApolloEngine } from 'apollo-engine';
 
 const GRAPHQL_PORT = 3000;
 
@@ -13,34 +13,22 @@ const GRAPHQL_PORT = 3000;
 const ENGINE_API_KEY = 'service:mdg-private-a-service:EB-LWSjPdZX0ph-Yyn2cxA';
 
 // Apollo Engine configuration for caching and performance monitoring
-const engine = new Engine({
-  engineConfig: {
-    apiKey: ENGINE_API_KEY,
-    logging: {
-      level: 'DEBUG'
-    },
-    stores: [
-      {
-        name: 'inMemEmbeddedCache',
-        inMemory: {
-          cacheSize: 10485760
-        }
+const engine = new ApolloEngine({
+  apiKey: ENGINE_API_KEY,
+  stores: [
+    {
+      name: 'inMemEmbeddedCache',
+      inMemory: {
+        cacheSize: 20971520 // 20 MB
       }
-    ],
-    queryCache: {
-      publicFullQueryStore: 'inMemEmbeddedCache'
     }
+  ],
+  queryCache: {
+    publicFullQueryStore: 'inMemEmbeddedCache'
   },
-  graphqlPort: GRAPHQL_PORT || process.env.PORT,
-  endpoint: '/graphql',
-  dumpTraffic: true
 });
 
-engine.start();
-
 const graphQLServer = express();
-
-graphQLServer.use(engine.expressMiddleware());
 
 graphQLServer.use(
   '/graphql',
@@ -51,7 +39,10 @@ graphQLServer.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
 
 graphQLServer.use(compression());
 
-graphQLServer.listen(GRAPHQL_PORT, () =>
+engine.listen({
+  port: GRAPHQL_PORT,
+  expressApp: graphQLServer,
+}, () =>
   console.log(
     `GraphiQL is now running on http://localhost:${GRAPHQL_PORT}/graphiql`
   )
